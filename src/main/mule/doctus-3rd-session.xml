@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:api-gateway="http://www.mulesoft.org/schema/mule/api-gateway" xmlns:jms="http://www.mulesoft.org/schema/mule/jms"
+	xmlns:ee="http://www.mulesoft.org/schema/mule/ee/core"
+	xmlns:file="http://www.mulesoft.org/schema/mule/file" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/file http://www.mulesoft.org/schema/mule/file/current/mule-file.xsd
+http://www.mulesoft.org/schema/mule/ee/core http://www.mulesoft.org/schema/mule/ee/core/current/mule-ee.xsd
+http://www.mulesoft.org/schema/mule/jms http://www.mulesoft.org/schema/mule/jms/current/mule-jms.xsd
+http://www.mulesoft.org/schema/mule/api-gateway http://www.mulesoft.org/schema/mule/api-gateway/current/mule-api-gateway.xsd">
+	<file:config name="File_Config" doc:name="File Config" doc:id="75655914-1d17-431b-8b0b-eaef345ffa3a" >
+	</file:config>
+	<http:listener-config name="HTTP_Listener_config" doc:name="HTTP Listener config" doc:id="e568b110-4372-4305-9a81-46fc520d4ada" >
+		<http:listener-connection host="0.0.0.0" port="8091" />
+	</http:listener-config>
+	<api-gateway:autodiscovery apiId="17486672" ignoreBasePath="true" doc:name="API Autodiscovery" doc:id="985f875b-92a0-43d7-8e02-d5a692b963a1" flowRef="Doctus-main" />
+	<flow name="doctus-3rd-sessionFlow" doc:id="e8925ecc-09b2-4154-9f26-b1af35111e7f" >
+		<http:listener doc:name="Listener" doc:id="c061dbb7-b2c4-4f26-85da-745a0a8493d0" config-ref="HTTP_Listener_config" path="/file"/>
+		<logger level="INFO" doc:name="Logger" doc:id="ec01d332-54d1-4988-9cd0-ed5ec1992620" />
+		<file:list doc:name="List" doc:id="676b03a7-b6e0-442a-9222-6a33c79efc7e" config-ref="File_Config" directoryPath="C:\Users\spandankmaity\Downloads\test\testFolder"/>
+		<ee:transform doc:name="Transform Message" doc:id="acd2fd8d-4e9f-40f3-b6f9-e3e2bc514f80" >
+			<ee:message >
+				<ee:set-payload ><![CDATA[%dw 2.0
+output application/json
+---
+payload.typedAttributes.fileName]]></ee:set-payload>
+			</ee:message>
+		</ee:transform>
+		<logger level="INFO" doc:name="Logger" doc:id="5c472ad1-b30a-4c48-93d8-2b5b3c860d10" />
+		<foreach doc:name="For Each" doc:id="211bfeb6-37dd-4e09-a0ef-b3a59f82e3e2" >
+			<ee:transform doc:name="Transform Message" doc:id="cef7e951-f3f2-40d4-8c7e-a75b9ba7a12f" >
+				<ee:message >
+					<ee:set-payload ><![CDATA[%dw 2.0
+output application/java
+---
+payload]]></ee:set-payload>
+				</ee:message>
+				<ee:variables >
+					<ee:set-variable variableName="fileNm" ><![CDATA[%dw 2.0
+output application/json
+---
+"C:/Users/spandankmaity/Downloads/test/testFolder/" ++ (payload as String)]]></ee:set-variable>
+				</ee:variables>
+			</ee:transform>
+			<file:read doc:name="Read" doc:id="df9e5fd9-801a-46a3-aea5-32497f91e5c7" path="#[vars.fileNm]"/>
+			<logger level="INFO" doc:name="Logger" doc:id="d37dab10-88b4-4b6f-a26f-5348a68f43d5" />
+		</foreach>
+	</flow>
+</mule>

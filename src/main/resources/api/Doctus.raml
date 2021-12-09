@@ -1,0 +1,24 @@
+#%RAML 1.0
+title: Doctus
+description: doctus training
+version: 1.0.0
+
+/doctus/demo:
+
+  get:
+    description: demo
+    responses:
+      200:
+        body:
+          application/json:
+           example: {"status" :"get - success"}
+  post:
+    description: 
+    body:
+      application/json:
+        example: {"a":"b"}
+    responses:
+      200:
+        body:
+          application/json:
+            example: {"status" : "post -success"}
